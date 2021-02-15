@@ -4,14 +4,11 @@
 
 ## Installation
 
-You can install gravitational from [PyPI](https://pypi.org/project/gravitational/):
+You can install the latest version of *gravitational* from [PyPI](https://pypi.org/project/gravitational/):
 
     pip install gravitational
 
-The only requirements are *numpy* and *matplotlib*. You can install them:
-
-    pip install numpy
-    pip install matplotlib
+The only requirements are *numpy* and *matplotlib*.
 
 
 ## How to use
