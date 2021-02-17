@@ -15,16 +15,26 @@ The only requirements are *numpy* and *matplotlib*.
 
 An example of simulating the inner planets:
 
-    >>> from gravitational.simulation import Simulation
-    >>> from gravitational.utils import SolarSystem
-    >>> ss = SolarSystem()
-    >>> sim = Simulation(ss.t)
-    >>> bodies = [ss.sun(), ss.mercury(), ss.venus(), ss.earth(), ss.mars()]
-    >>> names = ['sun', 'mercury', 'venus', 'earth', 'mars']
-    >>> colors = ['y','k','g','b','r']
-    >>> sizes = [25,8,9,10,9]
-    >>> for i,b in enumerate(bodies):
-           sim.add_body(name=names[i], color=colors[i], radius=b.r, size=sizes[i], 
-           mass=b.m, position=b.p0, velocity=b.v0)
-    >>> sim.play(path=True)
+    from gravitational.simulation import Simulation
+    from gravitational.solar_system import Constant, initial_state
+
+    t = '2021-02-17 04:26:00'
+
+    sim = Simulation(t)
+    c = Constant()
+
+    p0_sun, v0_sun = initial_state('sun', t)
+    p0_venus, v0_venus = initial_state('venus', t)
+    p0_earth, v0_earth = initial_state('earth', t)
+
+    s = sim.add_body(name='Sun', color='y', size=25, mass=c.m_sun,
+                     position=p0_sun, velocity=v0_sun)
+
+    v = sim.add_body(name='Venus', color='k', size=8, mass=c.m_venus,
+                     position=p0_venus, velocity=v0_venus)
+
+    e = sim.add_body(name='Earth', color='b', size=10, mass=c.m_earth,
+                     position=p0_earth, velocity=v0_earth)
+
+    sim.play(path=True)
 
