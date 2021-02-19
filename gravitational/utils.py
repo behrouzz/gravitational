@@ -3,8 +3,12 @@ import numpy as np
 def magnitude(x):
     return np.linalg.norm(np.array(x))
 
+def distance(p1, p2):
+        '''Returns distance between two positions'''
+        return magnitude(np.array(p2) - np.array(p1))
+
 def unit_vector(x):
-    return tuple(np.array(x)/magnitude(x))
+    return np.array(x)/magnitude(x)
 
 def random_normal_sphere(center, radius, size, std=1, seed=123):
     '''creates xyz coordiantes in a sphere'''
