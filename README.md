@@ -16,7 +16,8 @@ The only requirements are *numpy* and *matplotlib*.
 An example of simulating the inner planets:
 
     from gravitational.simulation import Simulation
-    from gravitational.solar_system import Constant, initial_state
+    from gravitational.solar_system import initial_state
+    from gravitational.constants import Constant
 
     t = '2021-02-17 04:26:00'
 

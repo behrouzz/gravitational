@@ -2,6 +2,7 @@ import re
 import numpy as np
 from datetime import timedelta, datetime
 from .plays import _play2d, _play3d
+from .orbit import set_orbit
 
 
 class Simulation:
@@ -78,17 +79,7 @@ class Simulation:
         if len(self.bodies)<2:
             raise Exception('You have to add at least two bodies')
         else:
-            if (b.v==np.array((0,0,0))).all():
-                b.v = 2 * np.random.random_sample(3,) - 1
-            Bb = b.p - B.p
-            mag_Bb = np.sqrt(Bb[0]**2 + Bb[1]**2 + Bb[2]**2)
-            orbital_speed = np.sqrt((self.G * B.m) / mag_Bb)
-            v_tan = b.v - (np.dot(b.v, Bb)/(mag_Bb**2))*Bb
-            mag_v_tan = np.sqrt(v_tan[0]**2 + v_tan[1]**2 + v_tan[2]**2)
-            v_tan_unit = v_tan / mag_v_tan
-            #b.v = orbital_speed * v_tan_unit
-            b.v = B.v + (orbital_speed * v_tan_unit)
-        
+            b.v = set_orbit(b.p, b.v, B.p, B.v, B.m, self.G)
 
     def _force_2bd(self, b1, b2):
         '''Gravitational force acting on b1 from b2'''

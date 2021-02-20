@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name="gravitational",
-    version="0.1.0",
+    version="0.2.0",
     author="Behrouz Safari",
     author_email="behrouz.safari@gmail.com",
     description="A package for gravitational simulations",

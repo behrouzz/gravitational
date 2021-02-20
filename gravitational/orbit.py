@@ -1,6 +1,28 @@
 import numpy as np
 from .utils import magnitude, distance, unit_vector
 
+def set_orbit(Pp, Vp, Ps, Vs, Ms, G):
+    '''
+    Corrects and returns velocity of Planet to be in orbiat of Star
+    
+    Pp : position of Planet
+    Vp : velocity of Planet
+    Ps : position of Star
+    Vs : velocity of Star
+    Ms : mass of Star
+    '''
+    # random direction, if velocity not already set
+    if (Vp==np.array((0,0,0))).all():
+        Vp = 2 * np.random.random_sample(3,) - 1
+    # vector from Star to Planet
+    Vsp = Pp - Ps
+    # distance from Star to Planet
+    d = magnitude(Vsp)
+    orbital_speed = np.sqrt((G * Ms) / d)
+    v_tan = Vp - (np.dot(Vp, Vsp)/(d**2))*Vsp
+    Vp = Vs + (orbital_speed * unit_vector(v_tan))
+    return Vp
+
 def L1(Mp, Pp, Ms, Ps):
     '''
     Returns position of lagrangian point L1 for Planet with respect to Star
