@@ -2,19 +2,21 @@ import re
 import numpy as np
 from datetime import timedelta, datetime
 from .plays import _play2d, _play3d
-from .orbit import set_orbit
+from .orbit import set_orbit, L1,L2,L3,L4,L5
+from .utils import distance
 
 
 class Simulation:
     '''The main class'''
-    def __init__(self, t0):
-        if isinstance(t0, datetime):
+    def __init__(self, t0=None):
+        if t0 is None:
+            self.t0 = datetime.now()
+        elif isinstance(t0, datetime):
             self.t0 = t0
         elif isinstance(t0, str) and bool(re.match("\d{4}-\d\d-\d\d \d\d:\d\d:\d\d", t0)):
             self.t0 = datetime.strptime(t0, '%Y-%m-%d %H:%M:%S')
         else:
-            now = datetime.now().isoformat().replace('T', ' ')[:19]+"'"
-            raise Exception("Supported time format: '%Y-%m-%d %H:%M:%S'.\nFor example: '"+now)
+            raise Exception("t0 should be a datetime object or a string in the format: '%Y-%m-%d %H:%M:%S'")
         self.G = 6.6743e-11
         self.bodies = []
         self.dates = []
@@ -58,7 +60,7 @@ class Simulation:
         position_possible = True
         for b in self.bodies:
             if b != body:
-                if self.distance(b, body) < b.radius + body.radius:
+                if distance(b.p, body.p) < b.radius + body.radius:
                     position_possible = False
 
         if position_possible:
@@ -68,22 +70,29 @@ class Simulation:
             print('The position conflicts with another body.\nBody not added. Try again.')
 
 
-    def distance(self, b1, b2):
-        '''Returns distance between two bodies'''
-        return np.sqrt((b1.p-b2.p)[0]**2 + (b1.p-b2.p)[1]**2 + (b1.p-b2.p)[2]**2)
-
-    def set_in_orbit(self, name_b, name_B):
-        '''Changes the velocity of name_b to be in the orbit of name_B'''
-        b = [i for i in self.bodies if i.name==name_b][0]
-        B = [i for i in self.bodies if i.name==name_B][0]
+    def set_orbit(self, b1, b2):
+        '''Changes the velocity of b1 to be in the orbit of b2'''
         if len(self.bodies)<2:
             raise Exception('You have to add at least two bodies')
         else:
-            b.v = set_orbit(b.p, b.v, B.p, B.v, B.m, self.G)
+            b1.v = set_orbit(b1.p, b1.v, b2.p, b2.v, b2.m, self.G)
+
+    def set_lagrange(self, L, b1, b2, b3):
+        '''Changes the position of b1 to be in lagrangian point of b2 with respect to b3'''
+        if L.upper()=='L1':
+            b1.p = np.array(L1(b2.m, b2.p, b3.m, b3.p))
+        elif L.upper()=='L2':
+            b1.p = np.array(L2(b2.m, b2.p, b3.m, b3.p))
+        elif L.upper()=='L3':
+            b1.p = np.array(L3(b2.m, b2.p, b3.m, b3.p))
+        elif L.upper()=='L4':
+            b1.p = np.array(L4(b2.p, b2.v, b3.p))
+        elif L.upper()=='L5':
+            b1.p = np.array(L5(b2.p, b2.v, b3.p))
 
     def _force_2bd(self, b1, b2):
         '''Gravitational force acting on b1 from b2'''
-        d = self.distance(b1,b2)
+        d = distance(b1.p, b2.p)
         mag_f = (self.G * b1.m * b2.m) / (d**2)
         f = mag_f * (b1.p - b2.p) / d
         return f
@@ -149,7 +158,7 @@ class Simulation:
         collision = False
         col_bodies = []
         for b in self.bodies:
-            if (self.distance(b, body) <= b.radius + body.radius) and (b!=body):
+            if (distance(b.p, body.p) <= b.radius + body.radius) and (b!=body):
                 collision = True
                 col_bodies.append(b)
         return [collision, col_bodies]
