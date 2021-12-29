@@ -55,3 +55,29 @@ def random_ec_sphere(center, r1, r2, size, seed=123):
     ys = y[cnd]
     zs = z[cnd]
     return list(zip(xs,ys,zs))[:size]
+
+def somigliana(phi):
+    """
+    Somigliana equation
+    
+    phi: latitude in degrees
+    g: Gravitational acceleration (m/s2)
+    """
+    phi = phi * (np.pi/180)
+    a = 1 + 0.00193185265245827352087 * (np.sin(phi)**2)
+    b = np.sqrt(1 - 0.006694379990141316996137 * (np.sin(phi)**2))
+    g = 9.780325335903891718546 * (a/b)
+    return g
+
+def welmec(phi, h):
+    """
+    WELMEC formula
+    
+    phi: latitude in degrees
+    h: height in meters above sea level
+    g: Gravitational acceleration (m/s2)
+    """
+    phi = phi * (np.pi/180)
+    g = (1 + 0.0053024*(np.sin(phi)**2) - 0.0000058*(np.sin(2*phi)**2))\
+        * 9.780318 - 0.000003085 * h
+    return g
