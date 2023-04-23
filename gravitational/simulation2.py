@@ -1,8 +1,8 @@
 import re
 import numpy as np
 from datetime import timedelta, datetime
-from .plays import _play2d, _play3d
-from .orbit import set_orbit, L1,L2,L3,L4,L5
+#from .plays import _play2d, _play3d
+#from .orbit import set_orbit, L1,L2,L3,L4,L5
 from .utils import distance
 
 
@@ -21,9 +21,9 @@ class Simulation:
 
 
     class Body:
-        def __init__(self, name, mass, position, velocity, modif=False):
+        def __init__(self, name, mass, position, velocity, exclud=True):
             self.name = name
-            self.modif = modif
+            self.exclud = exclud
             self.m = mass
             self.p = np.array(position)
             self.pS = []
@@ -35,8 +35,8 @@ class Simulation:
             self.zs = np.array([])
             self.age = 0
 
-    def add_body(self, name, mass, position, velocity):
-        body = self.Body(name, mass, position, velocity)
+    def add_body(self, name, mass, position, velocity, exclud=True):
+        body = self.Body(name, mass, position, velocity, exclud=True)
         self.bodies.append(body)
         return body
 
@@ -71,15 +71,21 @@ class Simulation:
 
         for i in range(len(t)):
             for b in self.bodies:
-                if b.modif:
+                if not b.exclud:
                     b.p = b.p + b.v*dt
                     b.pS.append(b.p)
+                else:
+                    print(b.name)
+                    b.p = b.pS[i]
 
             for b in self.bodies:
                 b.f = self._force_nbd(b, self.bodies) if b.m!=0 else 0
             for b in self.bodies:
-                b.v = b.v + (b.f/b.m)*dt if b.m!=0 else b.v
-                b.vS.append(b.v)
+                if not b.exclud:
+                    b.v = b.v + (b.f/b.m)*dt if b.m!=0 else b.v
+                    b.vS.append(b.v)
+                else:
+                    b.v = b.vS[i]
 
         
         for b in self.bodies:
@@ -89,26 +95,3 @@ class Simulation:
             b.xs, b.ys, b.zs = b.pS[:,0], b.pS[:,1], b.pS[:,2]
 
         self.runned = True
-
-    def _collision(self, body):
-        '''Checks whether body colids with other bodies'''
-        collision = False
-        col_bodies = []
-        for b in self.bodies:
-            if (distance(b.p, body.p) <= b.radius + body.radius) and (b!=body):
-                collision = True
-                col_bodies.append(b)
-        return [collision, col_bodies]
-
-    def play(self, dim='3d', legend=False, path=False, interval=20):
-        '''Play the animation'''
-        
-        if not self.runned:
-            self.run()
-
-        if self.d3 and dim=='3d':
-            _play3d(legend=legend, bodies=self.bodies, dates=self.dates, path=path, interval=interval)
-        elif dim=='2d':
-            _play2d(legend=legend, bodies=self.bodies, dates=self.dates, path=path, interval=interval)
-        else:
-            raise Exception("Specify dim as: dim='2d' or dim='3d'")

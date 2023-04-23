@@ -55,6 +55,18 @@ v0_sat = (-6685.277706938829, 6753.883892840782, 3077.3962505168047)
 
 
 sim.dates = t
+dt = (sim.dates[1]-sim.dates[0]).total_seconds()
 
-sun = sim.add_body(name='Sun', mass=c.m_sun, position=p0_sun, velocity=v0_sun)
-ear = sim.add_body(name='Earth', mass=c.m_earth, position=p0_ear, velocity=v0_ear)
+sun = sim.add_body(name='Sun', mass=c.m_sun, position=p0_sun, velocity=v0_sun, exclud=True)
+ear = sim.add_body(name='Earth', mass=c.m_earth, position=p0_ear, velocity=v0_ear, exclud=True)
+
+sim.bodies[0].pS = sun_pos
+sim.bodies[1].pS = ear_pos
+
+for i in range(2): # we have 2 bodies
+    dp = sim.bodies[i].pS[1:] - sim.bodies[i].pS[:-1]
+    sim.bodies[i].vS = dp/dt
+
+apo = sim.add_body(name='Apophis', mass=apophis_mass, position=p0_apo, velocity=v0_apo, exclud=False)
+
+sim.run()
